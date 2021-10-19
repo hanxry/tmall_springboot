@@ -37,6 +37,29 @@
                 },
                 getFile: function (event) {
                     this.file = event.target.files[0];
+                },
+                add: function () {
+                    // 判断分类名是否为空
+                    if (!checkEmpty(this.bean.name, "分类名称")) {
+                        return;
+                    }
+                    // 判断分类图片是否为空
+                    if (!checkEmpty(this.file, "分类图片")) {
+                        return;
+                    }
+                    var url = this.uri;
+                    // axios 上传文件要使用formData这种形式
+                    var formData = new FormData();
+                    formData.append("image", this.file);
+                    formData.append("name", this.bean.name);
+                    axios.post(url, formData).then(function (response) {
+                        // 上传成功后， 调用 vue.list(0) 重新查询第一页的数据。
+                        // 然后还原数据，如： vue.bean, vue.file, 还有上传控件里面的值。使得输入部分回到上传前的状态。
+                        vue.list(0);
+                        vue.bean = {id: 0, name: '', hp: '0'};
+                        $('#categoryPic').val('');
+                        vue.file = null;
+                    });
                 }
             }
         });
@@ -91,5 +114,29 @@
     <div th:replace="include/admin/adminPage::html"></div>
 </div>
 <div th:replace="include/admin/adminFooter::html"></div>
+<div class="panel panel-warning addDiv">
+    <div class="panel-heading">新增分类</div>
+    <div class="panel-body">
+        <table class="addTable">
+            <tr>
+                <td>分类名称</td>
+                <td>
+                    <input @keyup.enter="add" v-model.trim="bean.name" type="text" class="form-control"/>
+                </td>
+            </tr>
+            <tr>
+                <td>分类图片</td>
+                <td>
+                    <input id="categoryPic" accept="image/*" type="file" name="image" @change="getFile($event)"/>
+                </td>
+            </tr>
+            <tr class="submitTR">
+                <td colspan="2" align="center">
+                    <a herf="#nowhere" @click="add" class="btn btn-success">提交</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
 </body>
 </html>
