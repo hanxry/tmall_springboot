@@ -48,6 +48,26 @@ public class CategoryController {
         return null;
     }
 
+    @GetMapping("/categories/{id}")
+    public Category get(@PathVariable("id") int id) throws Exception {
+        Category bean = categoryService.get(id);
+        return bean;
+    }
+
+    @PutMapping("/categories/{id}")
+    public Object update(Category bean, MultipartFile image, HttpServletRequest request) throws Exception {
+        // 这里获取参数用的是 request.getParameter("name").
+        // 为什么不用 add里的注入一个 Category对象呢？
+        // 因为。。。PUT 方式注入不了。。。 只能用这种方式取参数了，试了很多次才知道是这么个情况~
+        String name = request.getParameter("name");
+        bean.setName(name);
+        categoryService.update(bean);
+        if (image != null) {
+            saveOrUpdateImageFile(bean, image, request);
+        }
+        return bean;
+    }
+
     public void saveOrUpdateImageFile(Category bean, MultipartFile image, HttpServletRequest request) throws IOException {
         File imageFolder = new File(request.getServletContext().getRealPath("img/category"));
         File file = new File(imageFolder, bean.getId() + ".jpg");
