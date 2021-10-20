@@ -39,6 +39,7 @@
                     this.file = event.target.files[0];
                 },
                 add: function () {
+                    console.log("调用add函数");
                     // 判断分类名是否为空
                     if (!checkEmpty(this.bean.name, "分类名称")) {
                         return;
@@ -60,6 +61,23 @@
                         $('#categoryPic').val('');
                         vue.file = null;
                     });
+                },
+                //函数名用的 deleteBean, 而不是 delete, 因为 delete 是保留字
+                deleteBean: function (id) {
+                    console.log("调用deleteBean函数")
+                    // 进行是否删除确认 checkDeleteLink()
+                    if (!checkDeleteLink()) {
+                        return;
+                    }
+                    var url = this.uri + "/" + id;
+                    axios.delete(url).then(function (response) {
+                        //根据 REST 规范，当删除数据后，应该返回一个空字符串，所以会判断 0!=response.data.length
+                        if (0 !== response.data.length) {
+                            alert(response.data);
+                        } else {
+                            vue.list(0);
+                        }
+                    })
                 }
             }
         });
@@ -112,31 +130,31 @@
         </table>
     </div>
     <div th:replace="include/admin/adminPage::html"></div>
-</div>
-<div th:replace="include/admin/adminFooter::html"></div>
-<div class="panel panel-warning addDiv">
-    <div class="panel-heading">新增分类</div>
-    <div class="panel-body">
-        <table class="addTable">
-            <tr>
-                <td>分类名称</td>
-                <td>
-                    <input @keyup.enter="add" v-model.trim="bean.name" type="text" class="form-control"/>
-                </td>
-            </tr>
-            <tr>
-                <td>分类图片</td>
-                <td>
-                    <input id="categoryPic" accept="image/*" type="file" name="image" @change="getFile($event)"/>
-                </td>
-            </tr>
-            <tr class="submitTR">
-                <td colspan="2" align="center">
-                    <a herf="#nowhere" @click="add" class="btn btn-success">提交</a>
-                </td>
-            </tr>
-        </table>
+    <div class="panel panel-warning addDiv">
+        <div class="panel-heading">新增分类</div>
+        <div class="panel-body">
+            <table class="addTable">
+                <tr>
+                    <td>分类名称</td>
+                    <td>
+                        <input @keyup.enter="add" v-model.trim="bean.name" type="text" class="form-control"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>分类图片</td>
+                    <td>
+                        <input id="categoryPic" accept="image/*" type="file" name="image" @change="getFile($event)"/>
+                    </td>
+                </tr>
+                <tr class="submitTR">
+                    <td colspan="2" align="center">
+                        <a href="#nowhere" @click="add" class="btn btn-success">提交</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 </div>
+<div th:replace="include/admin/adminFooter::html"></div>
 </body>
 </html>

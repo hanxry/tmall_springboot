@@ -5,10 +5,7 @@ import com.hanxry.tmall.service.CategoryService;
 import com.hanxry.tmall.util.ImageUtil;
 import com.hanxry.tmall.util.Page4Navigator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
@@ -39,6 +36,16 @@ public class CategoryController {
         categoryService.add(bean);
         saveOrUpdateImageFile(bean, image, request);
         return bean;
+    }
+
+    @DeleteMapping("/categories/{id}")
+    public String delete(@PathVariable("id") int id, HttpServletRequest request) {
+        categoryService.delete(id);
+        File imageFolder = new File(request.getServletContext().getRealPath("img/category"));
+        File file = new File(imageFolder, id + ".jpg");
+        file.delete();
+        // 返回 null, 会被RESTController 转换为空字符串。
+        return null;
     }
 
     public void saveOrUpdateImageFile(Category bean, MultipartFile image, HttpServletRequest request) throws IOException {
