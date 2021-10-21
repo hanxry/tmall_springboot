@@ -20,7 +20,7 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
   datasource:
-    url: jdbc:mysql://121.5.243.85:3306/tmall_springboot?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Hongkong&rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3306/tmall_springboot?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Hongkong&rewriteBatchedStatements=true
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
