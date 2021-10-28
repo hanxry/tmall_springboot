@@ -17,7 +17,7 @@ public class ProductImage {
 	
     @ManyToOne
     @JoinColumn(name="pid")
-    @JsonBackReference
+    @JsonBackReference // 这个注解是为了避免双向引用
 	private Product product;
 	
     private String type;
