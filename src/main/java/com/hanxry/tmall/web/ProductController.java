@@ -2,6 +2,7 @@ package com.hanxry.tmall.web;
 
 import com.hanxry.tmall.pojo.Product;
 import com.hanxry.tmall.service.CategoryService;
+import com.hanxry.tmall.service.ProductImageService;
 import com.hanxry.tmall.service.ProductService;
 import com.hanxry.tmall.util.Page4Navigator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +17,14 @@ public class ProductController {
     ProductService productService;
     @Autowired
     CategoryService categoryService;
+    @Autowired
+    ProductImageService productImageService;
 
     @GetMapping("/categories/{cid}/products")
     public Page4Navigator<Product> list(@PathVariable("cid") int cid, @RequestParam(value = "start", defaultValue = "0") int start, @RequestParam(value = "size", defaultValue = "5") int size) throws Exception {
         start = start < 0 ? 0 : start;
         Page4Navigator<Product> page = productService.list(cid, start, size, 5);
-
+        productImageService.setFirstProductImages(page.getContent());
         return page;
     }
 
