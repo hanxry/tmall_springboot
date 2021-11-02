@@ -1,4 +1,4 @@
-<div th:fragment="html">
+<div th:fragment="html" xmlns:th="http://www.w3.org/1999/xhtml">
 
     <script>
         function imgAndInfoPageRegisterListeners(vue) {
@@ -43,8 +43,8 @@
                             if (0 == result.code) {
                                 $(".addCartButton").html("已加入购物车");
                                 $(".addCartButton").attr("disabled", "disabled");
-                                $(".addCartButton").css("background-color", "lightgray")
-                                $(".addCartButton").css("border-color", "lightgray")
+                                $(".addCartButton").css("background-color", "lightgray");
+                                $(".addCartButton").css("border-color", "lightgray");
                                 $(".addCartButton").css("color", "black")
                             }
                         });
