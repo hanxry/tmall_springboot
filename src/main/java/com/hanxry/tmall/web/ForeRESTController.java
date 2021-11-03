@@ -1,5 +1,6 @@
 package com.hanxry.tmall.web;
 
+import com.hanxry.tmall.comparator.*;
 import com.hanxry.tmall.pojo.*;
 import com.hanxry.tmall.service.*;
 import com.hanxry.tmall.util.Result;
@@ -112,5 +113,46 @@ public class ForeRESTController {
         if (null != user)
             return Result.success();
         return Result.fail("未登录");
+    }
+    @GetMapping("forecategory/{cid}")
+    public Object category(@PathVariable int cid,String sort) {
+        Category c = categoryService.get(cid);
+        productService.fill(c);
+        productService.setSaleAndReviewNumber(c.getProducts());
+        categoryService.removeCategoryFromProduct(c);
+
+        if(null!=sort){
+            switch(sort){
+                case "review":
+                    c.getProducts().sort(new ProductReviewComparator());
+                    break;
+                case "date" :
+                    c.getProducts().sort(new ProductDateComparator());
+                    break;
+
+                case "saleCount" :
+                    c.getProducts().sort(new ProductSaleCountComparator());
+                    break;
+
+                case "price":
+                    c.getProducts().sort(new ProductPriceComparator());
+                    break;
+
+                case "all":
+                    c.getProducts().sort(new ProductAllComparator());
+                    break;
+            }
+        }
+
+        return c;
+    }
+    @PostMapping("foresearch")
+    public Object search( String keyword){
+        if(null==keyword)
+            keyword = "";
+        List<Product> ps= productService.search(keyword,0,20);
+        productImageService.setFirstProductImages(ps);
+        productService.setSaleAndReviewNumber(ps);
+        return ps;
     }
 }
