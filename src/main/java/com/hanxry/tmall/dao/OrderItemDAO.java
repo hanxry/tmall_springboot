@@ -3,6 +3,7 @@ package com.hanxry.tmall.dao;
 import com.hanxry.tmall.pojo.Order;
 import com.hanxry.tmall.pojo.OrderItem;
 import com.hanxry.tmall.pojo.Product;
+import com.hanxry.tmall.pojo.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,4 +14,5 @@ public interface OrderItemDAO extends JpaRepository<OrderItem, Integer> {
     List<OrderItem> findByOrderOrderByIdDesc(Order order);
 
     List<OrderItem> findByProduct(Product product);
+    List<OrderItem> findByUserAndOrderIsNull(User user);
 }

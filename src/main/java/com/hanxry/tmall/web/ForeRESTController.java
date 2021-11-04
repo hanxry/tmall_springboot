@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,23 +115,24 @@ public class ForeRESTController {
             return Result.success();
         return Result.fail("未登录");
     }
+
     @GetMapping("forecategory/{cid}")
-    public Object category(@PathVariable int cid,String sort) {
+    public Object category(@PathVariable int cid, String sort) {
         Category c = categoryService.get(cid);
         productService.fill(c);
         productService.setSaleAndReviewNumber(c.getProducts());
         categoryService.removeCategoryFromProduct(c);
 
-        if(null!=sort){
-            switch(sort){
+        if (null != sort) {
+            switch (sort) {
                 case "review":
                     c.getProducts().sort(new ProductReviewComparator());
                     break;
-                case "date" :
+                case "date":
                     c.getProducts().sort(new ProductDateComparator());
                     break;
 
-                case "saleCount" :
+                case "saleCount":
                     c.getProducts().sort(new ProductSaleCountComparator());
                     break;
 
@@ -146,13 +148,83 @@ public class ForeRESTController {
 
         return c;
     }
+
     @PostMapping("foresearch")
-    public Object search( String keyword){
-        if(null==keyword)
+    public Object search(String keyword) {
+        if (null == keyword)
             keyword = "";
-        List<Product> ps= productService.search(keyword,0,20);
+        List<Product> ps = productService.search(keyword, 0, 20);
         productImageService.setFirstProductImages(ps);
         productService.setSaleAndReviewNumber(ps);
         return ps;
+    }
+
+    @GetMapping("forebuyone")
+    public Object buyone(int pid, int num, HttpSession session) {
+        return buyoneAndAddCart(pid, num, session);
+    }
+
+    private int buyoneAndAddCart(int pid, int num, HttpSession session) {
+        Product product = productService.get(pid);
+        int oiid = 0;
+
+        User user = (User) session.getAttribute("user");
+        boolean found = false;
+        List<OrderItem> ois = orderItemService.listByUser(user);
+        for (OrderItem oi : ois) {
+            if (oi.getProduct().getId() == product.getId()) {
+                oi.setNumber(oi.getNumber() + num);
+                orderItemService.update(oi);
+                found = true;
+                oiid = oi.getId();
+                break;
+            }
+        }
+
+        if (!found) {
+            OrderItem oi = new OrderItem();
+            oi.setUser(user);
+            oi.setProduct(product);
+            oi.setNumber(num);
+            orderItemService.add(oi);
+            oiid = oi.getId();
+        }
+        return oiid;
+    }
+
+    @GetMapping("forebuy")
+    public Object buy(String[] oiid, HttpSession session) {
+        List<OrderItem> orderItems = new ArrayList<>();
+        float total = 0;
+
+        for (String strid : oiid) {
+            int id = Integer.parseInt(strid);
+            OrderItem oi = orderItemService.get(id);
+            total += oi.getProduct().getPromotePrice() * oi.getNumber();
+            orderItems.add(oi);
+        }
+
+        productImageService.setFirstProductImagesOnOrderItems(orderItems);
+
+        session.setAttribute("ois", orderItems);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("orderItems", orderItems);
+        map.put("total", total);
+        return Result.success(map);
+    }
+
+    @GetMapping("foreaddCart")
+    public Object addCart(int pid, int num, HttpSession session) {
+        buyoneAndAddCart(pid, num, session);
+        return Result.success();
+    }
+
+    @GetMapping("forecart")
+    public Object cart(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        List<OrderItem> ois = orderItemService.listByUser(user);
+        productImageService.setFirstProductImagesOnOrderItems(ois);
+        return ois;
     }
 }
